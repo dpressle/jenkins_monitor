@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  web:
+    build: ./web
+    command: uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    container_name: web
+    volumes:
+      - ./web/:/usr/src/app/
+    ports:
+      - "8001:8000"
+    depends_on:
+      - api
+
+  api:
+    build: ./src
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    container_name: api
+    volumes:
+      - ./src/:/usr/src/app/
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@postgres/hello_fastapi_dev
+    depends_on:
+      - db
+
+  worker:
+    build: ./src
+    command: uvicorn app.worker:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    container_name: worker
+    volumes:
+      - ./src/:/usr/src/app/
+    ports:
+      - "8003:8000"
+    environment:
+      - DATABASE_URL=postgresql://hello_fastapi:hello_fastapi@postgres/hello_fastapi_dev
+      - MQ_URL=amqp://mq/
+      - MQ_QUEUE=builds
+    depends_on:
+      - db
+      - mq
+
+  db:
+    image: postgres:13.1-alpine
+    container_name: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_fastapi
+      - POSTGRES_PASSWORD=hello_fastapi
+      - POSTGRES_DB=hello_fastapi_dev
+
+  mq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    # environment:
+    #   - RABBITMQ_DEFAULT_USER=rabbitmq
+    #   - RABBITMQ_DEFAULT_PASS=rabbitmq
+    ports:
+      - 5672:5672
+      - 4369:4369
+      - 15672:15672
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "5672" ]
+      interval: 5s
+      timeout: 15s
+      retries: 3
+    tty: true
+    stdin_open: true
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: hello_fastapi
