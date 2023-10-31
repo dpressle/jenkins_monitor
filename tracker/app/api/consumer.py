@@ -1,8 +1,7 @@
-from app.api import crud
-from app.api.models import BuildDB, BuildSchema
 import asyncio
 import aio_pika
 import ast
+import requests
 
 # works with this jenkins plugin: https://github.com/jenkinsci/mq-notifier-plugin
 # Entering queue:
@@ -62,16 +61,24 @@ async def on_message(message: aio_pika.IncomingMessage):
     job_name = url_list[-3]
     build_number = int(url_list[-2])
 
-    payload = BuildSchema(
-        job_name=job_name,
-        build_number=build_number,
-        state=state,
-        url=url,
-        parameters=str(parameters),
-        causes=causes,
-        status=status,
-    )
-
+    # payload = dict(
+    #     job_name=job_name,
+    #     build_number=build_number,
+    #     state=state,
+    #     url=url,
+    #     parameters=str(parameters),
+    #     causes=causes,
+    #     status=status
+    # )
+    payload = {
+        "job_name":job_name,
+        "build_number": build_number,
+        "state": state,
+        "url": url,
+        "parameters": str(parameters),
+        "causes": causes,
+        "status": status
+    }
 
     print(payload)
 
@@ -79,10 +86,13 @@ async def on_message(message: aio_pika.IncomingMessage):
         print(f"Ignoring state: {state}")
     elif state == 'STARTED':
         print(f"State: STARTED")
-        await crud.post(payload)
+        # await crud.post(payload)
+        r = requests.post(url='http://api:8000/builds/', json=payload,
+                          headers={"Content-Type": "application/json"})
+        print(r.text)
     elif state == 'COMPLETED':
         print(f"State: COMPLETED")
-        build = await crud.get_by_build_number(build_number)
-        await crud.put(dict(build).get('id'), payload)
+        # build = await crud.get_by_build_number(build_number)
+         # await crud.put(dict(build).get('id'), payload)
     else:
         print(f"wrong state: {state}")
