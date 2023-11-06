@@ -15,6 +15,47 @@ DATABASE_URL = os.getenv(
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
 
+projects_table = Table(
+    "projects",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("name", String(50))
+)
+
+# versions_table = Table(
+#     "versions",
+#     metadata,
+#     Column("id", Integer, primary_key=True),
+#     Column("project_id", Integer),
+#     Column("version", String(50)),
+#     Column("created_date", String(50), default=dt.now(
+#         tz("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M"))
+# )
+
+# revisions_table = Table(
+#     "revisions",
+#     metadata,
+#     Column("id", Integer, primary_key=True),
+#     Column("version_id", Integer),
+#     Column("revision", Integer),
+#     Column("created_date", String(50), default=dt.now(
+#         tz("Asia/Jerusalem")).strftime("%Y-%m-%d %H:%M"))
+# )
+
+# builds_table = Table(
+#     "builds",
+#     metadata,
+#     Column("id", Integer, primary_key=True),
+#     Column("revision_id", Integer),
+#     Column("job_name", String(50)),
+#     Column("job_number", Integer),
+#     Column("state", String(50)),
+#     Column("url", String(250)),
+#     Column("parameters", String(250), default=""),
+#     Column("causes", String(150), default="NA"),
+#     Column("status", String(50), default="NA"),
+# )
+
 builds_table = Table(
     "builds",
     metadata,

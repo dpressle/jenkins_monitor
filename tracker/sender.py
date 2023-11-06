@@ -4,10 +4,10 @@ import asyncio
 import aio_pika
 
 tracker = {
-    "state": 'COMPLETED',
-    "url": 'https://sw-jenkins.com/job/cdsoftwarebuilder/job/create-binaries/16279/',
-    "parameters": { "version":"0.0.1", "revision":"1"},
-    "status": "SUCCESS"
+    "state": 'STARTED',
+    "url": 'https://sw-jenkins.com/job/cdsoftwarebuilder/job/create-binaries/16280/',
+    "parameters": { "version":"0.1.0", "revision":"2"},
+    "status": ""
 }
 
 connection = pika.BlockingConnection(

@@ -1,12 +1,8 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-# import asyncio
-# import aio_pika
-
-from app.routes import ping, releases, builds
+from app.routes import ping, releases, builds, projects
 from app.db import engine, metadata, database
-from app.api.consumer import on_message
 
 metadata.create_all(engine)
 
@@ -30,11 +26,6 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await database.connect()
-    # loop = asyncio.get_event_loop()
-    # connection = await aio_pika.connect("amqp://mq/", loop=loop)
-    # channel = await connection.channel()
-    # queue = await channel.declare_queue("builds")
-    # await queue.consume(on_message, no_ack=True)
 
 
 @app.on_event("shutdown")
@@ -45,3 +36,4 @@ async def shutdown():
 app.include_router(ping.router)
 app.include_router(builds.router, prefix="/builds", tags=["builds"])
 app.include_router(releases.router, prefix="/releases", tags=["releases"])
+app.include_router(projects.router, prefix="/projects", tags=["projects"])
